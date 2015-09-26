@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>XO game</title>
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:800,700,600,400' rel='stylesheet' type='text/css'>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script>
+	function getRandomInt(min, max) {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+	function getRandomColor(){
+		var color = '#';
+		var hex = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
+		for (var i = 0; i < 6; i++) {
+			color += hex[getRandomInt(0,15)];
+		}
+		return color;
+	}
+	$(function(){
+		/*$('.cell').each(function(){
+			$(this).css('background',getRandomColor());
+		})*/
+		var current = 'x';
+		function setCell() {
+			if ($(this).hasClass('x') || $(this).hasClass('o')) {
+				return;
+			}
+			$(this).addClass(current);
+			console.log(checkWin(this));
+			current = current == 'x' ? 'o' : 'x';
+		}
+
+		function checkWin(cell) {
+			var has = false;
+			var checked = [[false,false,false],[false,false,false],[false,false,false]];
+			$('.cell').each(function(){
+				if ($(this).hasClass(current)) {
+					var x = $(this).parent().index('.row');
+					var y = $(this).index('.row:eq(' + x + ') .cell');
+					checked[x][y] = true;
+				}
+			})
+			var vert = horiz = crossLeft = crossRight = 0;
+			for (var i = 0; i < 3; i++) {
+				for (var j = 0; j < 3; j++) {
+					if (checked[i][j]) {
+						horiz++;
+					}
+				}
+				if (horiz == 3) {
+					return true;
+				}
+				horiz = 0;
+			}
+		}
+		$('.cell').on('click',setCell);
+	})
+	</script>
+	<style>
+	* {
+		margin: 0;
+		padding: 0;
+	}
+	#field {
+		margin: 0 auto;
+		position: relative;
+		width: 255px;
+	}
+	.row {
+		height: 80px;
+	}
+	.cell {
+		box-sizing: border-box;
+		display: inline-block;
+		height: 80px;
+		position: relative;
+		width: 80px;
+	}
+	.cell:nth-child(2) {
+		border-left: 3px solid gray;
+		border-right: 3px solid gray;
+	}
+	.row:nth-child(2) .cell {
+		border-top: 3px solid gray;
+		border-bottom: 3px solid gray;
+	} 
+	.cell.x:after, .cell.o:after {
+		font-family: 'Open Sans';
+		font-size: 70px;
+		font-weight: bold;
+		height: 80px;
+		left: 0;
+		line-height: 1;
+		position: absolute;
+		text-align: center;
+		top: 0;
+		width: 80px;
+	}
+	.cell.x:after {
+		content: 'x';
+	}
+	.cell.o:after {
+		content: 'o';
+	}
+	</style>
+</head>
+<body>
+	<div id="field">
+		<div class="row">
+			<div class="cell x"></div><div class="cell o"></div><div class="cell"></div>
+		</div><div class="row">
+			<div class="cell"></div><div class="cell"></div><div class="cell"></div>
+		</div><div class="row">
+			<div class="cell"></div><div class="cell"></div><div class="cell"></div>
+		</div>
+	</div>
+</body>
+</html>
