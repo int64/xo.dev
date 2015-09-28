@@ -41,18 +41,21 @@
 					checked[x][y] = true;
 				}
 			})
-			var vert = horiz = crossLeft = crossRight = 0;
 			for (var i = 0; i < 3; i++) {
-				for (var j = 0; j < 3; j++) {
-					if (checked[i][j]) {
-						horiz++;
-					}
-				}
-				if (horiz == 3) {
+				if (checked[i][0] && checked[i][1] && checked[i][2]) {
 					return true;
 				}
-				horiz = 0;
+				if (checked[0][i] && checked[1][i] && checked[2][i]) {
+					return true;
+				}
+				if (i == 0 && checked[i][i] && checked[i+1][i+1] && checked[i+2][i+2]) {
+					return true;
+				}
+				if (i == 0 && checked[i][i+2] && checked[i+1][i+1] && checked[i+2][i]) {
+					return true;
+				}
 			}
+			return false;
 		}
 		$('.cell').on('click',setCell);
 	})
@@ -84,7 +87,7 @@
 	.row:nth-child(2) .cell {
 		border-top: 3px solid gray;
 		border-bottom: 3px solid gray;
-	} 
+	}
 	.cell.x:after, .cell.o:after {
 		font-family: 'Open Sans';
 		font-size: 70px;
