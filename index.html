@@ -6,6 +6,9 @@
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans:800,700,600,400' rel='stylesheet' type='text/css'>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script>
+	function c(){
+		console.log.apply(console,arguments);
+	}
 	function getRandomInt(min, max) {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
@@ -17,47 +20,59 @@
 		}
 		return color;
 	}
-	$(function(){
-		/*$('.cell').each(function(){
-			$(this).css('background',getRandomColor());
-		})*/
-		var current = 'x';
-		function setCell() {
-			if ($(this).hasClass('x') || $(this).hasClass('o')) {
-				return;
-			}
-			$(this).addClass(current);
-			console.log(checkWin(this));
-			current = current == 'x' ? 'o' : 'x';
-		}
 
-		function checkWin(cell) {
-			var has = false;
-			var checked = [[false,false,false],[false,false,false],[false,false,false]];
-			$('.cell').each(function(){
-				if ($(this).hasClass(current)) {
-					var x = $(this).parent().index('.row');
-					var y = $(this).index('.row:eq(' + x + ') .cell');
-					checked[x][y] = true;
-				}
-			})
+	var game = {
+		current: 'x',
+		sizeX: 3,
+		sizeY: 3,
+		countCell: 3,
+		field: [['x','o',null],[null,null,null],[null,null,null]],
+		setCell: function(x,y) {
+			var sign = game.current;
+			if (game.field[x][y] != null) {
+				return false;
+			}
+			game.field[x][y] = game.current;
+			game.current = game.current == 'x' ? 'o' : 'x';
+			return sign;
+		},
+		oldCheckWin: function(sign) {
 			for (var i = 0; i < 3; i++) {
-				if (checked[i][0] && checked[i][1] && checked[i][2]) {
+				// check horizontal
+				if (game.field[i][0] == sign && game.field[i][1] == sign && game.field[i][2] == sign) {
 					return true;
 				}
-				if (checked[0][i] && checked[1][i] && checked[2][i]) {
+				// check vertical
+				if (game.field[0][i] == sign && game.field[1][i] == sign && game.field[2][i] == sign) {
 					return true;
 				}
-				if (i == 0 && checked[i][i] && checked[i+1][i+1] && checked[i+2][i+2]) {
+				// check diagonal topleft
+				if (i == 0 && game.field[i][i] == sign && game.field[i+1][i+1] == sign && game.field[i+2][i+2] == sign) {
 					return true;
 				}
-				if (i == 0 && checked[i][i+2] && checked[i+1][i+1] && checked[i+2][i]) {
+				// check diagonal topright
+				if (i == 0 && game.field[i][i+2] == sign && game.field[i+1][i+1] == sign && game.field[i+2][i] == sign) {
 					return true;
 				}
 			}
 			return false;
+		},
+		checkWin: function(sign) {
+
 		}
-		$('.cell').on('click',setCell);
+	}
+
+	$(function(){
+		$('.cell').on('click',function(){
+			var x = $(this).parent().index('.row');
+			var y = $(this).index('.row:eq(' + x + ') .cell');
+			var sign = game.setCell(x,y);
+			c('sign: ',sign);
+			if (sign) {
+				$(this).addClass(sign);
+				c('checkWin: ',game.oldCheckWin(sign));
+			}
+		});
 	})
 	</script>
 	<style>
