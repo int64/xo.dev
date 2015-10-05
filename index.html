@@ -23,10 +23,22 @@
 
 	var game = {
 		current: 'x',
-		sizeX: 3,
-		sizeY: 3,
-		countCell: 3,
-		field: [['x','o',null],[null,null,null],[null,null,null]],
+		size: 5,
+		winCount: 3,
+		field: [],
+		init: function(container) {
+			for (var i = 0; i < game.size; i++) {
+				var row = $('<div>').addClass('row');
+				var gRow = [];
+				for (var j = 0; j < game.size; j++) {
+					row.append($('<div>').addClass('cell'));
+					gRow.push(null);
+				}
+				container.append(row);
+				game.field.push(gRow);
+			}
+			container.css({'width': game.size * 80 + 'px'});
+		},
 		setCell: function(x,y) {
 			var sign = game.current;
 			if (game.field[x][y] != null) {
@@ -36,7 +48,7 @@
 			game.current = game.current == 'x' ? 'o' : 'x';
 			return sign;
 		},
-		oldCheckWin: function(sign) {
+		/*oldCheckWin: function(sign) {
 			for (var i = 0; i < 3; i++) {
 				// check horizontal
 				if (game.field[i][0] == sign && game.field[i][1] == sign && game.field[i][2] == sign) {
@@ -56,13 +68,36 @@
 				}
 			}
 			return false;
-		},
+		},*/
 		checkWin: function(sign) {
-
+			var v = 0;
+			var h = 0;
+			for (var i = 0; i < game.size; i++) {
+				for (var j = 0; j < game.size; j++) {
+					if (game.field[i][j] == sign) {
+						h++;
+					} else {
+						h = 0;
+					}
+					if (h == game.winCount) {
+						return 'h';
+					}
+					if (game.field[j][i] == sign) {
+						v++;
+					} else {
+						v = 0;
+					}
+					if (v == game.winCount) {
+						return 'v';
+					}
+				}
+			}
+			return false;
 		}
 	}
 
 	$(function(){
+		game.init($('#field'));
 		$('.cell').on('click',function(){
 			var x = $(this).parent().index('.row');
 			var y = $(this).index('.row:eq(' + x + ') .cell');
@@ -70,7 +105,7 @@
 			c('sign: ',sign);
 			if (sign) {
 				$(this).addClass(sign);
-				c('checkWin: ',game.oldCheckWin(sign));
+				c('checkWin: ',game.checkWin(sign));
 			}
 		});
 	})
@@ -90,18 +125,23 @@
 	}
 	.cell {
 		box-sizing: border-box;
+		border: 1px solid gray;
 		display: inline-block;
 		height: 80px;
 		position: relative;
 		width: 80px;
 	}
-	.cell:nth-child(2) {
-		border-left: 3px solid gray;
-		border-right: 3px solid gray;
+	.row:first-child .cell {
+		border-top: 0;
 	}
-	.row:nth-child(2) .cell {
-		border-top: 3px solid gray;
-		border-bottom: 3px solid gray;
+	.row:last-child .cell {
+		border-bottom: 0;
+	}
+	.row .cell:first-child {
+		border-left: 0;
+	}
+	.row .cell:last-child {
+		border-right: 0;
 	}
 	.cell.x:after, .cell.o:after {
 		font-family: 'Open Sans';
@@ -124,14 +164,6 @@
 	</style>
 </head>
 <body>
-	<div id="field">
-		<div class="row">
-			<div class="cell x"></div><div class="cell o"></div><div class="cell"></div>
-		</div><div class="row">
-			<div class="cell"></div><div class="cell"></div><div class="cell"></div>
-		</div><div class="row">
-			<div class="cell"></div><div class="cell"></div><div class="cell"></div>
-		</div>
-	</div>
+	<div id="field"></div>
 </body>
 </html>
