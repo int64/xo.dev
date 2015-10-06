@@ -27,6 +27,9 @@
 		winCount: 3,
 		field: [],
 		init: function(container) {
+			game.field = [];
+			game.current = 'x';
+			container.empty();
 			for (var i = 0; i < game.size; i++) {
 				var row = $('<div>').addClass('row');
 				var gRow = [];
@@ -37,7 +40,7 @@
 				container.append(row);
 				game.field.push(gRow);
 			}
-			container.css({'width': game.size * 90 + 'px'}).addClass('current-' + game.current);
+			container.css({'width': game.size * 110 + 'px'}).removeClass('current-x current-o').addClass('current-' + game.current);
 		},
 		setCell: function(x,y) {
 			var sign = game.current;
@@ -48,58 +51,49 @@
 			game.current = game.current == 'x' ? 'o' : 'x';
 			return sign;
 		},
-		/*oldCheckWin: function(sign) {
-			for (var i = 0; i < 3; i++) {
-				// check horizontal
-				if (game.field[i][0] == sign && game.field[i][1] == sign && game.field[i][2] == sign) {
-					return true;
-				}
-				// check vertical
-				if (game.field[0][i] == sign && game.field[1][i] == sign && game.field[2][i] == sign) {
-					return true;
-				}
-				// check diagonal topleft
-				if (i == 0 && game.field[i][i] == sign && game.field[i+1][i+1] == sign && game.field[i+2][i+2] == sign) {
-					return true;
-				}
-				// check diagonal topright
-				if (i == 0 && game.field[i][i+2] == sign && game.field[i+1][i+1] == sign && game.field[i+2][i] == sign) {
-					return true;
-				}
-			}
-			return false;
-		},*/
 		checkWin: function(sign) {
 			var v = 0;
 			var h = 0;
+			var isTie = true;
 			for (var i = 0; i < game.size; i++) {
 				for (var j = 0; j < game.size; j++) {
+					// horizontal
 					if (game.field[i][j] == sign) {
 						h++;
 					} else {
 						h = 0;
 					}
 					if (h == game.winCount) {
-						return 'h';
+						return sign;
 					}
+					// vertical
 					if (game.field[j][i] == sign) {
 						v++;
 					} else {
 						v = 0;
 					}
 					if (v == game.winCount) {
-						return 'v';
+						return sign;
+					}
+					if (game.field[i][j] == null) {
+						isTie = false;
 					}
 				}
+				h = 0;
+				v = 0;
 			}
-			return false;
+			// diagonal
+			var startTL = game.size - game.winCount + 1;
+
+			return isTie ? 't' : false;
 		}
 	}
 
 	$(function(){
-		var field = $('#field');
+		var field = $('#row-wrap');
 		game.init(field);
-		$('.cell').on('click',function(){
+		$('#field').width($('#row-wrap').width());
+		$(document).on('click','.cell',function(){
 			var x = $(this).parent().index('.row');
 			var y = $(this).index('.row:eq(' + x + ') .cell');
 			var sign = game.setCell(x,y);
@@ -110,11 +104,16 @@
 				c('checkWin: ',isWin);
 				field.removeClass();
 				if (isWin) {
-					alert('Winner is ' + sign);
+					$("#win-wrap").show().find('span').text(isWin);
 				}
 				field.addClass('current-' + game.current);
 			}
 		});
+		$('#win-wrap button').on('click',function(){
+			game.init(field);
+			$('.cell').removeClass('x o');
+			$('#win-wrap').hide();
+		})
 	})
 	</script>
 	<style>
@@ -127,33 +126,39 @@
 		position: relative;
 	}
 	#win-wrap {
-		/* display: none; */
+		display: none;
 		background: rgba(0,0,0,.7);
 		color: white;
 		font-family: Arial;
 		font-size: 40px;
 		height: 100%;
-    	line-height: 260px;
 		position: absolute;
 		width: 100%;
 		text-align: center;
+		top: 0;
 		z-index: 5;
 	}
+	#win-wrap div {
+		height: 100px;
+		margin: 0 auto;
+		vertical-align: middle;
+		width: 250px;
+	}
 	.row {
-		height: 80px;
+		height: 100px;
 		margin: 10px 0;
 	}
 	.cell {
 		background-color: #78bec5;
-		border-radius: 3px;
+		border-radius: 5px;
 		box-sizing: border-box;
 		display: inline-block;
 		font-family: "FontAwesome";
-		height: 80px;
+		height: 100px;
 		margin: 0 5px;
 		position: relative;
 		transition: background-color 0.3s;
-		width: 80px;
+		width: 100px;
 	}
 
 	.cell:not(.x):not(.o):hover {
@@ -161,39 +166,50 @@
 	}
 	
 	.cell.x:after, .cell.o:after,
-	#field.current-x .cell:not(.x):not(.o):hover:after,
-	#field.current-o .cell:not(.x):not(.o):hover:after {
-		height: 80px;
+	.current-x .cell:not(.x):not(.o):hover:after,
+	.current-o .cell:not(.x):not(.o):hover:after {
+		height: 100px;
 		left: 0;
-		line-height: 75px;
+		line-height: 95px;
 		position: absolute;
 		text-align: center;
 		top: 0;
-		width: 80px;
+		width: 100px;
 	}
 	.cell.x:after, .cell.o:after {
 		color: white;
+		border-radius: 5px;
+		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 	}
-	#field.current-x .cell:not(.x):not(.o):hover:after,
-	#field.current-o .cell:not(.x):not(.o):hover:after {
+	.cell.x:after {
+		background-color: #dc685a;
+	}
+	.cell.o:after {
+		background-color: #ecaf4f;
+	}
+	.current-x .cell:not(.x):not(.o):hover:after,
+	.current-o .cell:not(.x):not(.o):hover:after {
 		color: gray;
 	}
-	.cell.x:after, #field.current-x .cell:not(.x):not(.o):hover:after {
+	.cell.x:after, .current-x .cell:not(.x):not(.o):hover:after {
 		content: "";
 		font-size: 60px;
 	}
-	.cell.o:after, #field.current-o .cell:not(.x):not(.o):hover:after {
+	.cell.o:after, .current-o .cell:not(.x):not(.o):hover:after {
 		content: "";
 		font-size: 45px;
 		font-weight: bold;
-		line-height: 78px;
+		line-height: 98px;
 	}
 	</style>
 	<link rel="stylesheet prefetch" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css">
 </head>
 <body>
 	<div id="field">
-		<div id="win-wrap">Winner is <span>X</span></div>
+		<div id="row-wrap"></div>
+		<div id="win-wrap">
+			<div>Winner is <span>X</span><br><button>Restart</button></div>
+		</div>
 	</div>
 </body>
 </html>
